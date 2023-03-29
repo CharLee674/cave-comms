@@ -1,11 +1,14 @@
 #include <Arduino.h>
 #include <CMSIS_DSP.h>
 #include <math.h>
-#include "stm32f1xx_hal.h"
+
+// HardwareTimer using STM32Duino API: https://github.com/stm32duino/Arduino_Core_STM32/wiki/HardwareTimer-library
 
 void setup() {
   // put your setup code here, to run once:
-  // Pin definitions
+  pinMode(LED_BUILTIN, OUTPUT);
+  //turn LED on (HIGH is the voltage level)
+  digitalWrite(LED_BUILTIN, HIGH);
 
 }
 
