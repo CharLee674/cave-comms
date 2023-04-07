@@ -3,12 +3,13 @@
 #include <math.h>
 
 // Pin Definition
-#define TX_PIN PA0
+#define TX_PIN PB13
 
 #define BIT_LEN 8
 
 void transmit(String msg) {
   // Loop through characters of the message
+  
   for (auto &c : msg){
     // print character (for monitoring purposes)
     Serial.print(c);
@@ -38,5 +39,14 @@ void setup() {
 }
 
 void loop() { 
-  transmit("t");
+  Serial.println("Please enter message to send: ");
+  String msg_to_send = "";
+
+  // Wait for user input
+  while(Serial.available() == 0) {}
+
+  msg_to_send = Serial.readString();
+
+  transmit(msg_to_send);
+  Serial.println("Message sent!");
 }
