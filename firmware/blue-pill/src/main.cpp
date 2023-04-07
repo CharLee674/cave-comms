@@ -146,13 +146,13 @@ void setup() {
         	TimerCompareFormat_t::PERCENT_COMPARE_FORMAT);
 
   // Start PWM on gate pin
-  pwm_start(digitalPinToPinName(GATE_OUT_PIN1), GATE_FREQ, 118,
+  pwm_start(digitalPinToPinName(GATE_OUT_PIN1), GATE_FREQ,106,
         	TimerCompareFormat_t::RESOLUTION_8B_COMPARE_FORMAT);
-  pwm_start_inverted(digitalPinToPinName(GATE_OUT_PIN2), GATE_FREQ, 136,
+  pwm_start_inverted(digitalPinToPinName(GATE_OUT_PIN2), GATE_FREQ, 144,
         	TimerCompareFormat_t::RESOLUTION_8B_COMPARE_FORMAT);
 
   // Start toggle on gate shutdown pin
-  toggle(digitalPinToPinName(GATE_SD_PIN), TOGGLE_FREQ);
+  // toggle(digitalPinToPinName(GATE_SD_PIN), TOGGLE_FREQ);
 
   receiver.begin(4800);
   transmitter.begin(4800);
