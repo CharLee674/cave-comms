@@ -5,18 +5,20 @@
 
 // HardwareTimer using STM32Duino API: https://github.com/stm32duino/Arduino_Core_STM32/wiki/HardwareTimer-library
 
-#define AOUT_PIN PA1   // analog out pin
+#define AOUT_PIN PB6   // analog out pin
 #define BOOSTRAP_FREQ 490000 // 490 kHz
 #define DUTY_CYCLE 50
 
 #define GATE_OUT_PIN1 PA6
 #define GATE_OUT_PIN2 PA7
 #define GATE_FREQ 200000 // 200 kHz
-#define GATE_SD_PIN PB0
+#define TX_PIN PB13 // shutdown pin on gate driver
 #define TOGGLE_FREQ 5000 // 10 kHz
 
 #define SERIAL_PIN1 PB10
 #define SERIAL_PIN2 PA2
+
+#define BIT_LEN 8
 
 void pwm_start_inverted(PinName pin, uint32_t PWM_freq, uint32_t value, TimerCompareFormat_t resolution)
 {
@@ -130,6 +132,38 @@ void test_uart(int val)
   }
 }
 
+void transmit(String msg) {
+  // Loop through characters of the message
+
+  // Start bit
+  digitalWrite(TX_PIN, HIGH);
+  delayMicroseconds(100);
+  digitalWrite(TX_PIN, LOW);
+  delay(5);
+  
+  for (auto &c : msg){
+    // print character (for monitoring purposes)
+    Serial.print(c);
+    Serial.print("\n"); 
+
+    // Loop through each bit of the character & set the pin value
+    for (int i = 0; i < BIT_LEN; i++) {
+      // Set pin to bit value
+      digitalWrite(TX_PIN, c & 0b00000001);
+      Serial.print(c & 0b00000001, BIN);
+      delayMicroseconds(100);
+      // Set pin to low for pulse shut down time
+      digitalWrite(TX_PIN, LOW);
+      delay(5);
+      // bit shift
+      c = c >> 1;
+    }
+    Serial.print("\n"); 
+  }
+  //delay(1000);
+}
+
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -138,7 +172,8 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
 
   pinMode(AOUT_PIN, OUTPUT);
-  digitalWrite(GATE_SD_PIN, HIGH);
+  pinMode(TX_PIN, OUTPUT);
+
   Serial1.begin(115200); 
 
   // Start PWM on bootstrap pin
@@ -159,20 +194,23 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  //Output a PWM signal
-  Serial1.println("Serial Half-Duplex test started...");
 
-  for (uint32_t i = 0; i <= (0xFF); i++) {
-    test_uart(i);
-  }
+  Serial.println("Please enter message to send: ");
+  String msg_to_send = "";
 
+  // Wait for user input
+  while(Serial.available() == 0) {}
+
+  msg_to_send = Serial.readString();
+
+  transmit(msg_to_send);
+  Serial.println("Sent!");
+/*
   Serial1.println("Serial Half-Duplex test done.\nResults:");
   Serial1.print("OK: ");
   Serial1.println(nbTestOK);
   Serial1.print("KO: ");
   Serial1.println(nbTestKO);
   Serial1.println("Rebooting in 5s...");
-
-  delay(5000);
+*/
 }
