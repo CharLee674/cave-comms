@@ -134,33 +134,32 @@ void test_uart(int val)
 
 void transmit(String msg) {
   // Loop through characters of the message
+  int bit_delay = 20; // milliseconds
+  int bit_width = 100; // microseconds
 
   // Start bit
   digitalWrite(TX_PIN, HIGH);
-  delayMicroseconds(100);
+  delayMicroseconds(bit_width);
   digitalWrite(TX_PIN, LOW);
-  delay(5);
+  delay(bit_delay);
   
   for (auto &c : msg){
-    // print character (for monitoring purposes)
-    Serial.print(c);
-    Serial.print("\n"); 
-
+  
     // Loop through each bit of the character & set the pin value
     for (int i = 0; i < BIT_LEN; i++) {
       // Set pin to bit value
       digitalWrite(TX_PIN, c & 0b00000001);
-      Serial.print(c & 0b00000001, BIN);
-      delayMicroseconds(100);
+      //Serial.print(c & 0b00000001, BIN);
+      delayMicroseconds(bit_width);
+
       // Set pin to low for pulse shut down time
       digitalWrite(TX_PIN, LOW);
-      delay(5);
+      delay(bit_delay);
+      
       // bit shift
       c = c >> 1;
     }
-    Serial.print("\n"); 
   }
-  //delay(1000);
 }
 
 
@@ -170,6 +169,7 @@ void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   //turn LED on (HIGH is the voltage level)
   digitalWrite(LED_BUILTIN, HIGH);
+
 
   pinMode(AOUT_PIN, OUTPUT);
   pinMode(TX_PIN, OUTPUT);
@@ -186,31 +186,17 @@ void setup() {
   pwm_start_inverted(digitalPinToPinName(GATE_OUT_PIN2), GATE_FREQ, 144,
         	TimerCompareFormat_t::RESOLUTION_8B_COMPARE_FORMAT);
 
-  // Start toggle on gate shutdown pin
-  // toggle(digitalPinToPinName(GATE_SD_PIN), TOGGLE_FREQ);
-
   receiver.begin(4800);
   transmitter.begin(4800);
 }
 
 void loop() {
-
   Serial.println("Please enter message to send: ");
   String msg_to_send = "";
-
   // Wait for user input
   while(Serial.available() == 0) {}
 
   msg_to_send = Serial.readString();
 
   transmit(msg_to_send);
-  Serial.println("Sent!");
-/*
-  Serial1.println("Serial Half-Duplex test done.\nResults:");
-  Serial1.print("OK: ");
-  Serial1.println(nbTestOK);
-  Serial1.print("KO: ");
-  Serial1.println(nbTestKO);
-  Serial1.println("Rebooting in 5s...");
-*/
 }
